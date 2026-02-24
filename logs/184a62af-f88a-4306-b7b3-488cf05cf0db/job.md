@@ -1,0 +1,1 @@
+Apply memory optimization changes: 1. Update config/ollama-config.json to set num_ctx=4096 (hard context cap), 2. Modify scratchpad.md to track current memory usage and state, 3. Restructure EVENT_HANDLER.md for stateless prompt handling, 4. Add utils/file_chunks.py for safe file chunking and utils/grep_chunk.sh for keyword search in chunks.
