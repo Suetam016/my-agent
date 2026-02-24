@@ -58,6 +58,28 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/project:ro
     restart: unless-stopped
+# --- INÍCIO DA ADIÇÃO DO OLLAMA ---
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - OLLAMA_DEBUG=0
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
 
+    
 volumes:
   traefik_certs:
+  ollama_data:
