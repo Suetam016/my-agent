@@ -1,0 +1,75 @@
+name: Executar Agente RLM
+
+on:
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: 'Instrução principal para o agente RLM'
+        required: true
+        type: string
+        default: 'Analise este texto'
+      
+      contexto:
+        description: 'Texto de contexto ou caminho do arquivo no repositório'
+        required: false
+        type: string
+        default: ''
+      
+      modelo:
+        description: 'Modelo Ollama a usar'
+        required: false
+        type: choice
+        options:
+          - qwen3:4b
+          - mistral:latest
+          - neural-chat:latest
+          - phi3:latest
+        default: 'qwen3:4b'
+
+jobs:
+  run-rlm-agent:
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependências
+        run: |
+          python -m pip install --upgrade pip
+          pip install ollama
+
+      - name: Criar diretório de logs
+        run: mkdir -p logs/rlm
+
+      - name: Executar RLM Genérico
+        env:
+          OLLAMA_HOST: http://ollama:11434
+        run: |
+          python rlm/rlm_ollama.py \
+            --tarefa "${{ github.event.inputs.tarefa }}" \
+            --contexto "${{ github.event.inputs.contexto }}" \
+            --modelo "${{ github.event.inputs.modelo }}" \
+            --verbose > logs/rlm/output_${{ github.run_id }}.log 2>&1
+        
+        continue-on-error: true
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: rlm-output-${{ github.run_id }}
+          path: logs/rlm/output_${{ github.run_id }}.log
+          retention-days: 7
+
+      - name: Exibir resultado
+        if: always()
+        run: |
+          echo "=== RESULTADO DO RLM ===" 
+          cat logs/rlm/output_${{ github.run_id }}.log
