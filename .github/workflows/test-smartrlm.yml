@@ -1,37 +1,20 @@
-name: SmartRLM - RLM with Auto Early Exit
+name: Test SmartRLM Simple
 
 on:
   workflow_dispatch:
     inputs:
       tarefa:
-        description: 'Task/message from user'
+        description: 'Task'
         required: true
         type: string
-      
-      contexto:
-        description: 'Context or user history'
-        required: false
-        type: string
-        default: ''
-      
       modelo:
-        description: 'Ollama model'
-        required: false
-        type: choice
-        options:
-          - qwen3:4b
-          - mistral:latest
-          - phi3:latest
-        default: 'qwen3:4b'
-      
-      confianca:
-        description: 'Confidence threshold (0.0-1.0)'
+        description: 'Model'
         required: false
         type: string
-        default: '0.90'
+        default: 'qwen3:4b'
 
 jobs:
-  smartrlm:
+  test:
     runs-on: ${{ vars.RUNS_ON || 'ubuntu-latest' }}
     timeout-minutes: 10
 
@@ -61,14 +44,5 @@ jobs:
             --contexto "${{ github.event.inputs.contexto }}" \
             --modelo "${{ github.event.inputs.modelo }}" \
             --confianca "${{ github.event.inputs.confianca }}" \
-            --verbose > logs/smartrlm/output_${{ github.run_id }}.log 2>&1 || true
-
-      - name: Display output
-        if: always()
-        run: |
-          echo "=== SmartRLM Result ==="
-          if [ -f "logs/smartrlm/output_${{ github.run_id }}.log" ]; then
-            cat logs/smartrlm/output_${{ github.run_id }}.log
-          else
-            echo "No output log found"
-          fi
+            --verbose
+        continue-on-error: true
