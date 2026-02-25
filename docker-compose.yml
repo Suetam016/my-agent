@@ -58,6 +58,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - .:/project:ro
     restart: unless-stopped
+# --- INÍCIO DA ADIÇÃO DO OLLAMA ---
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
 
+    
 volumes:
   traefik_certs:
+  ollama_data:
