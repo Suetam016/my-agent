@@ -34,13 +34,13 @@ on:
 jobs:
   smart-rlm:
     runs-on: self-hosted
-    timeout-minutes: 10  # Menos tempo que o RLM normal
+    timeout-minutes: 10
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Setup Python 3.10
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -68,7 +68,6 @@ jobs:
 
       - name: Extract resultado JSON
         run: |
-          # Parse resultado do log
           tail -5 logs/smart_rlm/output_${{ github.run_id }}.log | grep "\[JSON\]" > logs/smart_rlm/resultado_${{ github.run_id }}.json || echo "{}" > logs/smart_rlm/resultado_${{ github.run_id }}.json
 
       - name: Upload artifacts
