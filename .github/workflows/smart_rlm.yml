@@ -1,0 +1,86 @@
+name: Executar Smart RLM (Com Early Exit)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: 'Mensagem/Tarefa do usuario'
+        required: true
+        type: string
+      
+      contexto:
+        description: 'Contexto ou historico do usuario'
+        required: false
+        type: string
+        default: ''
+      
+      modelo:
+        description: 'Modelo Ollama'
+        required: false
+        type: choice
+        options:
+          - qwen3:4b
+          - mistral:latest
+          - neural-chat:latest
+          - phi3:latest
+        default: 'qwen3:4b'
+      
+      confianca:
+        description: 'Threshold de confianca para early exit (0.0-1.0)'
+        required: false
+        type: string
+        default: '0.90'
+
+jobs:
+  smart-rlm:
+    runs-on: self-hosted
+    timeout-minutes: 10  # Menos tempo que o RLM normal
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install ollama
+
+      - name: Criar diretorio de output
+        run: mkdir -p logs/smart_rlm
+
+      - name: Executar SmartRLM
+        env:
+          OLLAMA_HOST: http://ollama:11434
+        run: |
+          python rlm/smart_rlm.py \
+            --tarefa "${{ github.event.inputs.tarefa }}" \
+            --contexto "${{ github.event.inputs.contexto }}" \
+            --modelo "${{ github.event.inputs.modelo }}" \
+            --confianca "${{ github.event.inputs.confianca }}" \
+            --verbose > logs/smart_rlm/output_${{ github.run_id }}.log 2>&1
+        
+        continue-on-error: true
+
+      - name: Extract resultado JSON
+        run: |
+          # Parse resultado do log
+          tail -5 logs/smart_rlm/output_${{ github.run_id }}.log | grep "\[JSON\]" > logs/smart_rlm/resultado_${{ github.run_id }}.json || echo "{}" > logs/smart_rlm/resultado_${{ github.run_id }}.json
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: smart-rlm-${{ github.run_id }}
+          path: logs/smart_rlm/
+          retention-days: 7
+
+      - name: Show resultado
+        if: always()
+        run: |
+          echo "=== SMART RLM RESULTADO ==="
+          cat logs/smart_rlm/output_${{ github.run_id }}.log | tail -20
