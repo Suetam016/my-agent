@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: rlm-output-${{ github.run_id }}
           path: logs/rlm/output_${{ github.run_id }}.log
