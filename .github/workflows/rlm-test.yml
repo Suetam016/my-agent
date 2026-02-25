@@ -1,0 +1,19 @@
+name: RLM Test - No Setup Required
+
+on:
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: 'Tarefa'
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: github-pages
+    timeout-minutes: 10
+
+    steps:
+      - name: Test Step
+        run: echo "Workflow is running!"
