@@ -28,7 +28,7 @@ on:
 
 jobs:
   run-rlm-agent:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     timeout-minutes: 30
 
     steps:
@@ -60,16 +60,12 @@ jobs:
         
         continue-on-error: true
 
-      - name: Upload logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: rlm-output-${{ github.run_id }}
-          path: logs/rlm/output_${{ github.run_id }}.log
-          retention-days: 7
-
       - name: Exibir resultado
         if: always()
         run: |
-          echo "=== RESULTADO DO RLM ===" 
-          cat logs/rlm/output_${{ github.run_id }}.log
+          echo "=== RESULTADO DO RLM ==="
+          if [ -f logs/rlm/output_${{ github.run_id }}.log ]; then
+            cat logs/rlm/output_${{ github.run_id }}.log
+          else
+            echo "Nenhum output encontrado"
+          fi

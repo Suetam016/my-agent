@@ -1,0 +1,1 @@
+Update `config/SYSTEM_NAME.md` to set the system name to 'DraBerinjela'. Then, update the web interface's title file (`web/title.html`) to display 'DraBerinjela' and replace the logo image file (`web/logo.png`) with `web/draberinjela-logo.png`.
